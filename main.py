@@ -1,24 +1,36 @@
 import random
+from pathlib import Path
 from moviepy import VideoFileClip, concatenate_videoclips
 
-vid_path = './vids/'
+JUMPSCARE_PATH = './vids/'
+JUMPSCARE_LIST = [VideoFileClip(vid) for vid in Path(JUMPSCARE_PATH).iterdir() if vid.is_file()]
+MAX_OCCUR = 1 #Max number of occurrence of a single jumpscare
 
-def insert_random_jumpscare(og_path, scare_path, output_path):
-    og = VideoFileClip(og_path)
-    jumpscare = VideoFileClip(scare_path)
+# Pick a random jumpscare from the list by index - This function is called a random amount of time (0 - MAX_OCCUR?)
+def pick_jumpscare() -> VideoFileClip:
+    idx_jumpscare = random.uniform(0,len(JUMPSCARE_LIST) - 1)
+    return JUMPSCARE_LIST[idx_jumpscare]
 
+#TODO: Enhance this function - make sure there wont be multiple jumpscare happening at once? Actually, nested jumpscare would be pretty funny.
+def insert_jumpscare(masterpiece, jumpscare) -> list[VideoFileClip]:
+
+    clip_list = []
     #Find where to put jumpscare
-    max_start_time = og.duration
+    max_start_time = masterpiece.duration
     insert_time = random.uniform(0, max_start_time)
 
+    #TODO: Perform recursion on masterpiece until there are no longer any jumpscare to add?
     #Inserting the jumpscare
     print(f"Inserting clip at {insert_time:.2f} seconds")
-    before = og.subclipped(0, insert_time)
-    after = og.subclipped(insert_time, og.duration)
+    before = masterpiece.subclipped(0, insert_time)
+    after = masterpiece.subclipped(insert_time, max_start_time)
 
-    #combining the clips
+    #combining the clips - how about we call concatenate_videoclips once, but the array is randomly generated.
+    return clip_list
+
+def finalize(clip_list, output_path):
     masterpiece = concatenate_videoclips(
-        [before, jumpscare, after],
+        clip_list,
         method="compose"
     )
 
@@ -28,14 +40,13 @@ def insert_random_jumpscare(og_path, scare_path, output_path):
         audio_codec="aac"
     )
 
-    og.close()
-    jumpscare.close()
     masterpiece.close()
 
-
 if __name__ == "__main__":
-    insert_random_jumpscare(
-        og_path = vid_path + "2.mp4",
-        scare_path = vid_path + "1.mp4",
-        output_path = "masterpiece.mp4"
-    )
+    masterpiece = VideoFileClip("masterpiece.mp4")
+
+    #Refactor this
+    for i in range(MAX_OCCUR):
+        masterpiece = insert_jumpscare(masterpiece, pick_jumpscare)
+    
+    finalize()

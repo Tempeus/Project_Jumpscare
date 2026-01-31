@@ -11,3 +11,6 @@ Powershell - .\jumpscare\Scripts\Activate.ps1
 
 ## Library
 moviepy  
+
+## TODO
+Have a mix of random jumpscare clips and the script will add a random amount of clips at a random amount of times in the video.  
