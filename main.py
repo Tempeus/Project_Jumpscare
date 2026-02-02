@@ -65,7 +65,7 @@ def finalize(clip_list: list[VideoFileClip], output_path: str):
         clip.close()
 
 if __name__ == "__main__":
-    masterpiece = VideoFileClip("masterpiece.mp4")
+    masterpiece = VideoFileClip("test.mp4")
 
     clip_list = insert_jumpscare(
         masterpiece,
